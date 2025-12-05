@@ -5,7 +5,7 @@ This repository contains experimental evaluation data and analysis scripts for t
 ## Directory Structure
 
 ```
-swarmplus-evaluation-data/
+swarm-evaluation-data/
 ├── ccgrid-26/                          # CCGrid 2026 paper evaluation data
 │   ├── single-site/                    # Single-site experiments
 │   │   ├── run-mesh-10-100/           # Format: run-<topology>-<agents>-<jobs>
