@@ -1,6 +1,6 @@
-# SwarmPlus Evaluation Data
+# Swarm Evaluation Data
 
-This repository contains experimental evaluation data and analysis scripts for the SwarmPlus distributed job scheduling system. The data supports research publications and provides reproducible results for performance, scalability, and resilience studies.
+This repository contains experimental evaluation data and analysis scripts for the SWARM: Multi Agent Consensus framework for distributed job selection system. The data supports research publications and provides reproducible results for performance, scalability, and resilience studies.
 
 ## Directory Structure
 
