@@ -286,19 +286,6 @@ cd ../SwarmAgents
 pip install -r requirements.txt
 ```
 
-## Related Documentation
-
-- `../SwarmAgents/README.md`: System architecture and implementation
-- `../CLAUDE.md`: Developer guide and testing procedures
-- `../SwarmAgents/DYNAMIC_AGENTS_USAGE.md`: Dynamic scaling documentation
-- `../SwarmAgents/AGENT_FAILURE_HANDLING.md`: Resilience mechanisms
-
-## Publication References
-
-This data supports:
-- **CCGrid 2026**: "SwarmPlus: Distributed Multi-Agent Job Scheduling with PBFT Consensus"
-- Performance, scalability, and resilience evaluation
-
 ## Archive Management
 
 Large datasets compressed as `.tgz` files:
@@ -310,9 +297,3 @@ To extract:
 tar -xzf ccgrid-26.tgz
 ```
 
-## Contact
-
-For questions about the data or analysis:
-- Check experiment logs in individual `run-*/` directories
-- Review configuration files: `config_swarm_multi.yml`
-- See parent repository documentation: `../SwarmAgents/`
