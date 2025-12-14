@@ -6,28 +6,44 @@ This repository contains experimental evaluation data and analysis scripts for t
 
 ```
 swarmplus-evaluation-data/
-├── ccgrid-26/                          # CCGrid 2026 paper evaluation data
-│   ├── single-site/                    # Single-site experiments
-│   │   ├── run-mesh-10-100/           # Format: run-<topology>-<agents>-<jobs>
-│   │   ├── run-ring-30-500/
-│   │   └── ...
-│   ├── multi-site/                     # Multi-site distributed experiments
-│   │   ├── run-hierarchical-110-1000/
-│   │   ├── run-mesh-30-500/
-│   │   └── ...
-│   ├── resilience/                     # Failure recovery experiments
-│   │   ├── catastrophic-failure/
-│   │   ├── dynamic-bucket-01/         # Dynamic agent addition scenarios
-│   │   ├── dynamic-jobs-01/
-│   │   ├── dynamic-time-01/
-│   │   ├── fail-site/                 # Site failure scenarios
-│   │   └── figures/
-│   └── compare_failure_scenarios.py   # Analysis script
+├── runs/                               # All experimental runs
+│   ├── ccgrid-25/                     # CCGrid 2025 baseline data
+│   └── ccgrid-26/                     # CCGrid 2026 paper evaluation data
+│       ├── single-site/               # Single-site experiments
+│       │   ├── run-mesh-10-100/      # Format: run-<topology>-<agents>-<jobs>
+│       │   ├── run-ring-30-500/
+│       │   ├── run-hierarchical-110-1000/
+│       │   └── ...
+│       ├── multi-site/                # Multi-site distributed experiments
+│       │   ├── run-hierarchical-110-1000/
+│       │   ├── run-mesh-30-500/
+│       │   └── ...
+│       └── resilience/                # Failure recovery & dynamic scaling
+│           ├── grpc/                  # gRPC-based failure detection
+│           │   ├── single-agent/     # Single agent failure (3.3% loss)
+│           │   │   ├── run01/
+│           │   │   ├── run02/
+│           │   │   ├── run03/
+│           │   │   ├── run04/
+│           │   │   └── run05/
+│           │   ├── multiple-agents/  # Multiple agent failures (26.7% loss)
+│           │   │   └── run01-05/
+│           │   └── catastrophic/     # Catastrophic failure (50% loss)
+│           │       └── run01-05/
+│           ├── redis/                 # Redis-based failure detection
+│           │   ├── single-agent/
+│           │   ├── multiple-agents/
+│           │   └── catastrophic/
+│           ├── dynamic-bucket-01/     # Load-based dynamic agent addition
+│           ├── dynamic-jobs-01/       # Job-completion-based scaling
+│           ├── dynamic-time-01/       # Time-based agent scaling
+│           ├── create_availability_figure_v2.py  # Multi-run aggregation
+│           └── plot_dynamic_scaling.py
 ├── plot_multi_run_results.py          # Multi-run comparison plots
 ├── plot_paper_evaluation.py           # Paper figure generation
 ├── compare_ccgrid_vs_v2.py            # Version comparison analysis
 ├── plot_ccgrid_comparison.py          # CCGrid data visualization
-└── ccgrid-26.tgz                      # Compressed archive of all data
+└── runs.tgz                           # Compressed archive of all runs
 
 ```
 
@@ -53,18 +69,35 @@ Distributed experiments across multiple geographical sites:
 
 ### 3. Resilience Experiments
 
-Failure handling and recovery scenarios:
+Failure handling and recovery scenarios with multiple runs (n=5) for statistical robustness:
+
+#### Failure Detection Comparison (gRPC vs Redis)
+
+**gRPC-based Detection:**
+- Near-instantaneous failure detection via bidirectional streaming channels
+- 5 runs per scenario: `run01/` through `run05/`
+- Scenarios:
+  - `single-agent/`: 1/30 agents failed (3.3% capacity loss)
+  - `multiple-agents/`: 8/30 agents failed (26.7% capacity loss)
+  - `catastrophic/`: 15/30 agents failed (50% capacity loss)
+
+**Redis-based Detection:**
+- Timer-based heartbeat monitoring (45s threshold ±10% jitter)
+- 5 runs per scenario matching gRPC scenarios
+- Same failure scenarios for direct comparison
+
+**Analysis:**
+- `create_availability_figure_v2.py`: Aggregates multiple runs, computes mean±std statistics
+- Generates comparison plots with error bars showing variance across runs
 
 #### Dynamic Agent Addition
-- `dynamic-time-01`: Time-based agent scaling
-- `dynamic-bucket-01`: Load-based agent addition
-- `dynamic-jobs-01`: Job-completion-triggered scaling
-
-#### Failure Scenarios
-- `fail-site`: Complete site failure recovery
-- `catastrophic-failure`: Multiple simultaneous agent failures
+- `dynamic-time-01`: Time-based agent scaling (20→30 agents at t=30s)
+- `dynamic-bucket-01`: Load-based agent addition (triggered when queue depth > 50)
+- `dynamic-jobs-01`: Job-completion-triggered scaling (add agents after 100 jobs complete)
 
 ## Data Format
+
+### Standard Run Directory
 
 Each experiment directory (`run-*`) contains:
 
@@ -73,9 +106,26 @@ run-<topology>-<agents>-<jobs>/
 ├── all_jobs.csv              # Consolidated job execution data (V2 format)
 ├── agent-<id>.csv            # Per-agent job data (legacy format)
 ├── agent-<id>.log            # Agent execution logs
+├── agent_<id>_load_trace.csv # Per-agent resource utilization over time
 ├── metrics.json              # Aggregated performance metrics
 ├── consensus_votes.json      # Consensus round details (if saved)
 └── config_swarm_multi.yml    # Configuration used for this run
+```
+
+### Resilience Run Directory (Failure Scenarios)
+
+Failure detection experiments include additional files:
+
+```
+resilience/grpc/single-agent/run01/
+├── all_jobs.csv                           # Job execution data
+├── agent-<id>.csv                         # Per-agent job data
+├── agent-<id>.log                         # Agent execution logs
+├── failed_agents.csv                      # Detected failed agents with timestamps
+├── killed_agents.csv                      # Intentionally terminated agents
+├── fault_tolerance_metrics_summary.csv    # Recovery metrics
+├── reassigned_jobs.csv                    # Jobs reassigned after failures (if any)
+└── config_swarm_multi.yml                 # Configuration
 ```
 
 ### all_jobs.csv Schema
@@ -88,6 +138,31 @@ run-<topology>-<agents>-<jobs>/
 | `finished_at` | Job completion timestamp |
 | `latency` | End-to-end execution time (seconds) |
 | `status` | `completed`, `failed`, or `timeout` |
+
+### failed_agents.csv Schema (Resilience Experiments)
+
+| Column | Description |
+|--------|-------------|
+| `agent_id` | ID of failed agent |
+| `first_detected_at` | Timestamp when failure was first detected |
+| `first_detected_by` | Detection mechanism (`grpc` or `redis`) |
+| `grpc_detections` | Number of peers detecting via gRPC |
+| `redis_detections` | Number of peers detecting via Redis |
+| `avg_detection_latency` | Average detection latency across peers (seconds) |
+| `true_detection_latency` | Actual latency from kill to detection (if available) |
+
+### fault_tolerance_metrics_summary.csv Schema
+
+| Column | Description |
+|--------|-------------|
+| `total_jobs` | Total jobs in workload |
+| `completed_jobs` | Successfully completed jobs |
+| `failed_jobs` | Jobs that failed |
+| `completion_rate_pct` | Job completion percentage |
+| `system_availability_pct` | System availability during failures |
+| `recovery_time_seconds` | Time to recover from failures |
+| `jobs_reassigned` | Number of jobs reassigned to surviving agents |
+| `agents_failed` | Number of agents that failed |
 
 ### metrics.json Structure
 
@@ -163,19 +238,53 @@ CCGrid-specific visualization and analysis:
 # Format matching publication requirements
 ```
 
-### ccgrid-26/compare_failure_scenarios.py
+### runs/ccgrid-26/resilience/create_availability_figure_v2.py
 
-Resilience and failure recovery analysis:
+**Multi-run failure detection comparison (gRPC vs Redis):**
 
 ```bash
-cd ccgrid-26
-./compare_failure_scenarios.py
+cd runs/ccgrid-26/resilience
 
-# Analyzes failure scenarios:
-# - Agent dropout handling
-# - Job reassignment efficiency
-# - Recovery time metrics
-# - Availability during failures
+# Compare gRPC vs Redis across all failure scenarios
+python create_availability_figure_v2.py \
+    --grpc-scenarios grpc/single-agent/ grpc/multiple-agents/ grpc/catastrophic/ \
+    --redis-scenarios redis/single-agent/ redis/multiple-agents/ redis/catastrophic/ \
+    --output comparison_multirun.png \
+    --killed-only \
+    --pdf
+
+# Generates:
+# - Aggregated statistics across 5 runs per scenario (mean ± std)
+# - Grouped bar charts with error bars
+# - Detection latency comparison (~3900× speedup for gRPC)
+# - Job completion rates under different failure scenarios
+# - Statistical summary printed to console
+```
+
+**Key Features:**
+- Automatically discovers all `run01/` through `run05/` directories
+- Computes mean, std, min, max across runs
+- Displays error bars showing variance
+- Includes run count (n=5) in labels
+- Outputs detailed statistical summary
+
+**Output Statistics:**
+```
+Detection Latency (mean ± std):
+  gRPC:
+    Single Agent: 0.0 ± 0.0s (range: 0.0--0.0s, n=5)
+    Multiple Agents: 0.0 ± 0.0s (range: 0.0--0.0s, n=5)
+    Catastrophic: 0.0 ± 0.0s (range: 0.0--0.0s, n=5)
+  Redis:
+    Single Agent: 54.2 ± 0.5s (range: 53.3--54.9s, n=5)
+    Multiple Agents: 54.0 ± 0.3s (range: 53.6--54.5s, n=5)
+    Catastrophic: 54.3 ± 0.4s (range: 53.7--54.9s, n=5)
+
+Availability (Jobs Completed %, mean ± std):
+  Single Agent (1/30, 3.3% agent loss):
+    gRPC:  99.8 ± 0.2% (range: 99.6--100.0%, n=5)
+    Redis: 99.2 ± 0.7% (range: 98.2--100.0%, n=5)
+  ...
 ```
 
 ## Usage Examples
@@ -184,7 +293,7 @@ cd ccgrid-26
 
 ```bash
 # Navigate to experiment directory
-cd ccgrid-26/single-site/run-mesh-30-500
+cd runs/ccgrid-26/single-site/run-mesh-30-500
 
 # Inspect metrics
 cat metrics.json | python -m json.tool
@@ -196,14 +305,38 @@ head -20 all_jobs.csv
 grep -i "failed\|error" agent-*.log
 ```
 
+### Analyzing Resilience Multi-Run Data
+
+```bash
+# Navigate to a specific scenario
+cd runs/ccgrid-26/resilience/grpc/single-agent
+
+# Check all runs
+ls -la run*/failed_agents.csv
+
+# Compare metrics across runs
+for run in run0{1..5}; do
+  echo "=== $run ==="
+  cat $run/fault_tolerance_metrics_summary.csv
+done
+
+# Generate aggregated comparison
+cd ../..  # Back to resilience/
+python create_availability_figure_v2.py \
+    --grpc-scenarios grpc/*/ \
+    --redis-scenarios redis/*/ \
+    --output comparison.png \
+    --pdf
+```
+
 ### Comparing Multiple Configurations
 
 ```python
 from plot_multi_run_results import MultiRunAnalyzer
 
 analyzer = MultiRunAnalyzer(
-    base_dir="ccgrid-26/single-site",
-    output_dir="ccgrid-26/single-site/plots"
+    base_dir="runs/ccgrid-26/single-site",
+    output_dir="runs/ccgrid-26/single-site/plots"
 )
 analyzer.load_all_runs()
 analyzer.plot_topology_comparison()
@@ -217,7 +350,7 @@ analyzer.generate_summary_report()
 # Generate all paper figures
 ./plot_paper_evaluation.py
 
-# Output: Publication-ready PDFs in ccgrid-26/single-site/plots/
+# Output: Publication-ready PDFs in runs/ccgrid-26/single-site/plots/
 ```
 
 ## Key Metrics Explained
@@ -289,11 +422,54 @@ pip install -r requirements.txt
 ## Archive Management
 
 Large datasets compressed as `.tgz` files:
-- `ccgrid-26.tgz`: All CCGrid 2026 evaluation data
+- `runs.tgz`: All experimental runs (ccgrid-25 and ccgrid-26)
 
 To extract:
 
 ```bash
-tar -xzf ccgrid-26.tgz
+# Extract all runs
+tar -xzf runs.tgz
 ```
+
+**Note:** The repository uses Git LFS (Large File Storage) for `.tgz` archives. Ensure Git LFS is installed:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+## Key Findings Summary
+
+### Resilience Experiments (n=5 runs per scenario)
+
+**Failure Detection Performance:**
+- **gRPC Detection:** Near-instantaneous (0.0s ± 0.0s)
+- **Redis Detection:** 54.2 ± 0.5s average latency
+- **Speedup:** gRPC is ~3900× faster than Redis
+
+**System Availability Under Failures:**
+
+| Scenario | Agent Loss | gRPC Availability | Redis Availability |
+|----------|-----------|-------------------|-------------------|
+| Single Agent | 3.3% (1/30) | 99.8 ± 0.2% | 99.2 ± 0.7% |
+| Multiple Agents | 26.7% (8/30) | 94.9 ± 2.7% | 98.2 ± 1.4% |
+| Catastrophic | 50.0% (15/30) | 93.7 ± 1.0% | 92.5 ± 3.3% |
+
+**Key Insights:**
+- Both detection mechanisms maintain >99% availability under single agent failures
+- Redis achieves higher availability (98.2% vs 94.9%) under multiple-agent failures, suggesting slower detection allows more stable quorum recalculation
+- Graceful degradation: System maintains 92-99% job completion even under 50% agent loss
+- Incomplete jobs are primarily due to resource constraints on surviving agents, not failure detection mechanisms
+
+### Topology Scalability
+
+**Best Performers:**
+- **Small Scale (<50 agents):** Mesh topology - 0.34s mean selection (Mesh-10)
+- **Medium Scale (50-250 agents):** Hierarchical topology - 0.93-1.01s mean selection
+- **Large Scale (>250 agents):** Hierarchical topology scales to 990 agents (46.12s mean selection)
+
+**WAN Overhead (Multi-Site):**
+- Hierarchical-30: 1.28× slowdown (best WAN resilience)
+- Mesh-30: 2.07× slowdown
+- Hierarchical-110: 3.73× slowdown (10 geographic sites)
 
