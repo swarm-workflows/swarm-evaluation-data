@@ -1,11 +1,11 @@
-# SwarmPlus Evaluation Data
+# Swarm Evaluation Data
 
-This repository contains experimental evaluation data and analysis scripts for the SwarmPlus distributed job scheduling system. The data supports research publications and provides reproducible results for performance, scalability, and resilience studies.
+This repository contains experimental evaluation data and analysis scripts for the Swarm distributed job scheduling system. The data supports research publications and provides reproducible results for performance, scalability, and resilience studies.
 
 ## Directory Structure
 
 ```
-swarmplus-evaluation-data/
+swarm-evaluation-data/
 ├── runs/                               # All experimental runs
 │   ├── ccgrid-25/                     # CCGrid 2025 baseline data
 │   └── ccgrid-26/                     # CCGrid 2026 paper evaluation data
