@@ -375,7 +375,7 @@ Examples:
 
 All experiments conducted using:
 - **SwarmAgents**: Production PBFT-based scheduling system
-- **Test Runner**: `SwarmAgents/run_test_v2.py`
+- **Test Runner**: `SwarmAgents/run_test.py`
 - **Redis**: Shared job queue (localhost or distributed)
 - **Job Generator**: Synthetic workloads with realistic resource requirements
 
@@ -394,7 +394,7 @@ AGENTS=$(echo run-mesh-30-500 | cut -d'-' -f3)
 JOBS=$(echo run-mesh-30-500 | cut -d'-' -f4)
 
 # Run with same parameters
-python run_test_v2.py \
+python run_test.py \
   --mode local \
   --agent-type resource \
   --agents $AGENTS \
