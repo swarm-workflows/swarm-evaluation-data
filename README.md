@@ -7,8 +7,10 @@ This repository contains experimental evaluation data and analysis scripts for t
 ```
 swarm-evaluation-data/
 ├── contextual-bandit-scenario-a.tgz    # LinUCB vs epsilon-greedy delegation eval (2026-07; see runs/contextual-bandit-scenario-a/README.md inside)
+├── contextual-bandit-scenario-b.tgz    # LinUCB discount under mid-run failure flip (2026-07; see runs/contextual-bandit-scenario-b/README.md inside)
 ├── runs/                               # All experimental runs
 │   ├── contextual-bandit-scenario-a/  # Extracted contextual-bandit eval (Redis dumps, plots, analysis)
+│   ├── contextual-bandit-scenario-b/  # Non-stationarity flip eval (discount comparison)
 │   ├── ccgrid-25/                     # CCGrid 2025 baseline data
 │   └── ccgrid-26/                     # CCGrid 2026 paper evaluation data
 │       ├── single-site/               # Single-site experiments
