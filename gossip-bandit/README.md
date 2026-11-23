@@ -1,9 +1,9 @@
 # Conference paper (gossip consensus + contextual bandit delegation): collected run data
 
-Collector output for the frozen campaign (SwarmAgents tag `isc27-freeze`, 0bceb349) and for the review
-ablations (tag `isc27-freeze-15`, d3755e2b). These are the per-run, per-job and per-decision tables that
+Collector output for the frozen campaign (SwarmAgents tag `eval-freeze`, 0bceb349) and for the review
+ablations (tag `eval-freeze-15`, d3755e2b). These are the per-run, per-job and per-decision tables that
 every number in the paper is computed from. The per-cell summary, the figures and the scripts live in the
-SwarmAgents repository under `docs/results/isc27-frozen-0bceb349/`.
+SwarmAgents repository under `docs/results/frozen-0bceb349/`.
 
 | File | Contents | Unpacked |
 |---|---|---|
@@ -19,10 +19,10 @@ To rebuild the paper's tables and figures:
 
 ```bash
 cd SwarmAgents
-tar xzf ../swarmplus-evaluation-data/isc27-gossip-bandit/collect-frozen.tgz -C runs
+tar xzf ../swarmplus-evaluation-data/gossip-bandit/collect-frozen.tgz -C runs
 .venv/bin/python evaluation/paper/build.py --manifest evaluation/paper/manifest_frozen.yml
-.venv/bin/python evaluation/paper/fig_ablation.py   docs/results/isc27-frozen-0bceb349 /tmp/out
-.venv/bin/python evaluation/paper/fig_f3_compact.py docs/results/isc27-frozen-0bceb349 /tmp/out
+.venv/bin/python evaluation/paper/fig_ablation.py   docs/results/frozen-0bceb349 /tmp/out
+.venv/bin/python evaluation/paper/fig_f3_compact.py docs/results/frozen-0bceb349 /tmp/out
 ```
 
 Not included: the code, inputs and container images of the three real workflows, and the raw run trees (agent logs, per-level job CSVs, `run_meta.json`, `rtt_matrix.json` per

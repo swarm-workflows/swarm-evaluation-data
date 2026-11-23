@@ -6,7 +6,7 @@ This repository contains experimental evaluation data and analysis scripts for t
 
 ```
 swarm-evaluation-data/
-├── isc27-gossip-bandit/                # Conference paper (gossip consensus + bandit delegation): collector output for the frozen campaign and the review ablations (2026-11; see its README.md)
+├── gossip-bandit/                # Conference paper (gossip consensus + bandit delegation): collector output for the frozen campaign and the review ablations (2026-11; see its README.md)
 ├── contextual-bandit-scenario-a.tgz    # LinUCB vs epsilon-greedy delegation eval (2026-07; see runs/contextual-bandit-scenario-a/README.md inside)
 ├── contextual-bandit-scenario-b.tgz    # LinUCB discount under mid-run failure flip (2026-07; see runs/contextual-bandit-scenario-b/README.md inside)
 ├── contextual-bandit-fixes-validation.tgz  # Scenario C fixes validated + lin_ts head-to-head (2026-07)
