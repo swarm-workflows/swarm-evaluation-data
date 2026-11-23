@@ -10,6 +10,7 @@ SwarmAgents repository under `docs/results/isc27-frozen-0bceb349/`.
 | `collect-frozen.tgz` | `collect-frozen/<source>/{runs_wide,runs_tidy,config_agg,decisions,job_rtt,events_summary}.csv` for the 521 frozen runs, the RTT-bin tables (`e3a-*`), the real-workflow comparison (`t6`) and the collection logs | about 0.9 GB |
 | `collect-review.tgz` | The same collector output for the 63 review-ablation runs: `partA` (Snow instance limit 64/256), `partB` (PBFT Mesh-180, larger send pool), `partC/<cell>` (arrival-rate sweep, limit 16), `sweep64/<cell>` and `sweep64p7` (sweep at limit 64), `control` (same-session control at 16) | about 0.2 GB |
 | `workloads.tgz` | The job sets the runs replayed: `replay-golden` (2,222 records, the source of every simulated set), the per-fleet sets `jobs_600` to `jobs_8000`, the job-mix-shift set, and the job records of the two mixed real-workflow sets. Its own `README.md` gives how each was built | about 115 MB |
+| `workload-sources.tgz` | The rest of the former `runs-new/` tree: the raw Pegasus trace set `pegasus-trace-809` with its source profile, its per-file variant, the real-execution set `execution-golden`, and `build_golden.py`, which builds `replay-golden` from the two source sets. No result in the paper uses these directly. Four metadata files had a local source path shortened when archived | about 60 MB |
 
 Produced on the deployment's database node by `evaluation/paper/collect_frozen.sh` and by
 `evaluation/collect.py --root <campaign out-dir> --out <dir>`.
